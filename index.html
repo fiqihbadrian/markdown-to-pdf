@@ -90,8 +90,8 @@
                 get markdown() {
                     return this.markdownContent;
                 }
-                convertTexttoHtml() {
-                    return marked.parse(this.markdownContent);
+                markdownPreview: function() {
+                    return this.markdownContent;
                 }
             }
         }
