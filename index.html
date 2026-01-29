@@ -1,3 +1,5 @@
+<!-- target kaya website yang ini https://github.com/ThisIs-Developer/Markdown-Viewer -->
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -61,14 +63,16 @@
             </form>
         </div>
 
-        <div class="ml-8 bg-white p-8 rounded shadow-md w-full max-w-md" x-data="markdownPreview()">
-            <h2 class="text-xl font-bold mb-4 text-center">Preview</h2>
-            <div class="prose max-w-none" x-html="marked.parse(markdownPreview.markdown)"></div>
+        <!-- Preview -->
+        <div class="bg-white p-8 rounded shadow-md w-full max-w-md h-[500px] overflow-y-auto">
+            <h2 class="text-xl font-bold mb-4 text-center">Live Preview</h2>
+            <div class="prose max-w-none" x-html="marked.parse(markdownContent)"></div>
         </div>
         
 
         <!-- button bottom -->
         <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+          
             <button @click="convertToPdf" class="bg-green-600 text-white px-6 py-3 rounded shadow hover:bg-green-700 transition">
                 Convert to PDF
             </button>
@@ -84,41 +88,32 @@
 
 
     <script>
-        function markdownPreview() {
-            return {
-                markdownContent: '',
-                get markdown() {
-                    return this.markdownContent;
-                }
-                markdownPreview: function() {
-                    return this.markdownContent;
-                }
+
+    function markdownToPdfApp() {
+        return {
+            markdownContent: '# Hello World\n\nThis is a **markdown** to PDF converter.\n\n- Item 1\n- Item 2\n- Item 3',
+            convertToPdf() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Convert markdown to HTML
+                const htmlContent = marked.parse(this.markdownContent);
+
+                // Create a temporary element to hold the HTML content
+                const tempElement = document.createElement('div');
+                tempElement.innerHTML = htmlContent;
+
+                // Use jsPDF's html method to convert HTML to PDF
+                doc.html(tempElement, {
+                    callback: function (doc) {
+                        doc.save('markdown.pdf');
+                    },
+                    x: 10,
+                    y: 10
+                });
             }
         }
-
-        function markdownToPdfApp() {
-            return {
-                markdownContent: '',
-                convertToPdf() {
-                    // Convert markdown to HTML
-                    const htmlContent = marked.parse(this.markdownContent);
-
-                    // Create a new jsPDF instance
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF();
-
-                    // Add HTML content to PDF
-                    pdf.html(htmlContent, {
-                        callback: function (doc) {
-                            // Save the PDF
-                            doc.save('document.pdf');
-                        },
-                        x: 10,
-                        y: 10
-                    });
-                }
-            }
-        }
+    }
     </script>
 
 
