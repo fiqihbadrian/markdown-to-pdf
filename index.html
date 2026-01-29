@@ -97,6 +97,11 @@
         .markdown-preview em {
             font-style: italic;
         }
+        /* Force textarea to stay full height */
+        #markdown-input {
+            min-height: 100% !important;
+            max-height: 100% !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -117,20 +122,20 @@
   </nav>
 
   <!-- MAIN CONTENT -->
-  <div class="max-w-7xl mx-auto px-4 py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="h-[calc(100vh-64px)] max-w-full px-4 py-4">
+    <div class="h-full grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- EDITOR PANEL -->
-      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div class="h-full bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
+        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
           <h2 class="text-lg font-semibold text-gray-700">Editor</h2>
           <button onclick="clearEditor()" class="text-sm text-red-600 hover:text-red-700 font-medium">
             Clear
           </button>
         </div>
-        <div class="p-4">
+        <div class="flex-1 p-4 overflow-hidden">
           <textarea 
             id="markdown-input" 
-            class="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            class="w-full h-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="# Start typing your markdown here...
 
 ```javascript
@@ -142,8 +147,8 @@ console.log('Hello, Markdown!');
 
 
       <!-- PREVIEW PANEL -->
-      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div class="h-full bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
+        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
           <h2 class="text-lg font-semibold text-gray-700">Preview</h2>
           <div class="flex gap-2">
             <button onclick="downloadPdf()" class="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition">
@@ -151,7 +156,7 @@ console.log('Hello, Markdown!');
             </button>
           </div>
         </div>
-        <div class="p-6 h-[calc(100vh-280px)] overflow-y-auto">
+        <div class="flex-1 p-6 overflow-y-auto">
           <div id="preview" class="markdown-preview"></div>
         </div>
       </div>
