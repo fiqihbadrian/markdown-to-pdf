@@ -151,8 +151,8 @@ console.log('Hello, Markdown!');
         <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
           <h2 class="text-lg font-semibold text-gray-700">Preview</h2>
           <div class="flex gap-2">
-            <button onclick="downloadPdf()" class="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition">
-              PDF
+            <button id="pdf-btn" onclick="downloadPdf()" class="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+              <span id="pdf-text">PDF</span>
             </button>
           </div>
         </div>
@@ -218,26 +218,54 @@ hey('World');
       
 
   function downloadPdf() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const htmlContent = marked.parse(input.value);
-    const tempElement = document.createElement('div');
-    tempElement.innerHTML = htmlContent;
-    tempElement.style.padding = '20px';
-    tempElement.style.fontFamily = 'Arial, sans-serif';
+    const btn = document.getElementById('pdf-btn');
+    const btnText = document.getElementById('pdf-text');
+    
+    try {
+      // Check if jsPDF is loaded
+      if (!window.jspdf) {
+        alert('PDF library belum ter-load. Coba refresh halaman.');
+        return;
+      }
+
+      // Disable button and show loading
+      btn.disabled = true;
+      btnText.textContent = 'Loading...';
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
       
-
-
-      doc.html(tempElement, {
-        callback: function (doc) {
-          doc.save('document.pdf');
-        },
-        x: 10,
-        y: 10,
-        width: 180,
-        windowWidth: 800
-    });
+      const htmlContent = marked.parse(input.value);
+      const tempElement = document.createElement('div');
+      tempElement.innerHTML = htmlContent;
+      tempElement.style.padding = '20px';
+      tempElement.style.fontFamily = 'Arial, sans-serif';
+      tempElement.style.lineHeight = '1.6';
+      
+      // Use setTimeout to prevent UI freeze
+      setTimeout(() => {
+        doc.html(tempElement, {
+          callback: function (doc) {
+            doc.save('markdown-document.pdf');
+            // Re-enable button
+            btn.disabled = false;
+            btnText.textContent = 'PDF';
+          },
+          x: 10,
+          y: 10,
+          width: 180,
+          windowWidth: 800
+        });
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error saat generate PDF: ' + error.message);
+      // Re-enable button on error
+      btn.disabled = false;
+      btnText.textContent = 'PDF';
     }
+  }
 
 
  input.addEventListener('input', updatePreview);
