@@ -259,6 +259,7 @@ hey('World');
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
+      
       html2pdf().set(opt).from(element).save().then(() => {
         btn.disabled = false;
         btnText.textContent = 'PDF';
