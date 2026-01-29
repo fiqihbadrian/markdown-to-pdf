@@ -1,126 +1,260 @@
-<!-- target kaya website yang ini https://github.com/ThisIs-Developer/Markdown-Viewer -->
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>markdown to pdf</title>
+    <title>Markdown to PDF</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.5/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .markdown-preview {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .markdown-preview h1 {
+            font-size: 2em;
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .markdown-preview h2 {
+            font-size: 1.5em;
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .markdown-preview h3 {
+            font-size: 1.25em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .markdown-preview code {
+            background-color: #f6f8fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 85%;
+        }
+        .markdown-preview pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+            margin: 16px 0;
+        }
+        .markdown-preview pre code {
+            background: none;
+            padding: 0;
+        }
+        .markdown-preview blockquote {
+            border-left: 4px solid #dfe2e5;
+            padding-left: 16px;
+            color: #6a737d;
+            margin: 16px 0;
+        }
+        .markdown-preview a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        .markdown-preview a:hover {
+            text-decoration: underline;
+        }
+        .markdown-preview ul, .markdown-preview ol {
+            padding-left: 2em;
+            margin: 16px 0;
+        }
+        .markdown-preview table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        .markdown-preview table th,
+        .markdown-preview table td {
+            border: 1px solid #dfe2e5;
+            padding: 6px 13px;
+        }
+        .markdown-preview table th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        .markdown-preview img {
+            max-width: 100%;
+            height: auto;
+        }
+        .markdown-preview p {
+            margin: 16px 0;
+        }
+        .markdown-preview strong {
+            font-weight: 600;
+        }
+        .markdown-preview em {
+            font-style: italic;
+        }
+    </style>
 </head>
-<body x-data="{ scrolled: false, mobileMenuOpen: false }" @scroll.window="scrolled = (window.pageYOffset > 80)">
-  <!-- NAVBAR WRAPPER -->
-  <div class="fixed top-0 left-0 w-full z-50 flex justify-center pointer-events-none">
-    <nav id="navbar"
-      class="pointer-events-auto transition-all duration-500 ease-out flex items-center justify-between px-6 md:px-10 py-4"
-      :class="scrolled ? 'mt-4 w-[90%] max-w-6xl rounded-full bg-white/80 backdrop-blur-md shadow-lg' : 'w-full bg-transparent'">
-      <!-- LOGO -->
-      <a href="/" class="font-bold tracking-wide text-black text-xl md:text-2xl">
-        Markdwn to PDF
-      </a>
+<body class="bg-gray-50">
+  <!-- NAVBAR -->
+  <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl md:text-2xl font-bold text-gray-900">
+            Markdown to PDF
+          </h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="stats" class="text-sm text-gray-600 hidden md:block"></span>
+        </div>
+      </div>
+    </div>
+  </nav>
 
-      <!-- DESKTOP MENU -->
-      <div class="hidden md:flex gap-8">
-        <a href="/" class="font-medium text-black/90 hover:text-green-600">Home</a>
-        <a href="/about" class="font-medium text-black/90 hover:text-green-600">About</a>
-        <a href="/contact" class="font-medium text-black/90 hover:text-green-600">Contact</a>
+  <!-- MAIN CONTENT -->
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- EDITOR PANEL -->
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-700">Editor</h2>
+          <button onclick="clearEditor()" class="text-sm text-red-600 hover:text-red-700 font-medium">
+            Clear
+          </button>
+        </div>
+        <div class="p-4">
+          <textarea 
+            id="markdown-input" 
+            class="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="# Start typing your markdown here...
+
+```javascript
+console.log('Hello, Markdown!');
+```"
+          ></textarea>
+        </div>
       </div>
 
-      <!-- MOBILE BUTTON -->
-      <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-2xl text-black">
-        ☰
-      </button>
-    </nav>
-  </div>
 
-  <!-- MOBILE MENU -->
-  <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false"
-    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2"
-    x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
-    x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
-    class="md:hidden fixed top-[72px] left-0 right-0 w-full bg-white/95 backdrop-blur-lg shadow-lg z-40"
-    style="display: none;">
-    <div class="p-6 space-y-2">
-      <a href="/"
-        class="block py-3 px-4 font-medium text-zinc-800 hover:bg-zinc-100 rounded-lg transition-colors">Home</a>
-      <a href="/about"
-        class="block py-3 px-4 font-medium text-zinc-800 hover:bg-zinc-100 rounded-lg transition-colors">About</a>
-      <a href="/contact"
-        class="block py-3 px-4 font-medium text-zinc-800 hover:bg-zinc-100 rounded-lg transition-colors">Contact</a>
+      <!-- PREVIEW PANEL -->
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-700">Preview</h2>
+          <div class="flex gap-2">
+            <button onclick="downloadPdf()" class="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition">
+              PDF
+            </button>
+          </div>
+        </div>
+        <div class="p-6 h-[calc(100vh-280px)] overflow-y-auto">
+          <div id="preview" class="markdown-preview"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- section text area left -->
-    <section class="min-h-screen flex items-start justify-center bg-gray-100 py-20 space-x-8 px-4">
-        <div class="bg-white p-8 rounded shadow-md w-full max-w-md" x-data="markdownToPdfApp()">
-            <h1 class="text-2xl font-bold mb-6 text-center">Markdown to PDF Converter</h1>
-            <form @submit.prevent="convertToPdf">
-                <div class="mb-4">
-                    <label for="markdown" class="block text-gray-700 mb-2">Enter Markdown:</label>
-                    <textarea id="markdown" x-model="markdownContent" rows="10" class="w-full p-2 border border-gray-300 rounded" placeholder="# Hello World"></textarea>
-                </div>
-                
-            </form>
-        </div>
+  <script>
+    const input = document.getElementById('markdown-input');
+    const preview = document.getElementById('preview');
+    const stats = document.getElementById('stats');
+    const defaultMarkdown = `# Markdown Viewer
+*halo*
+**halo**
+***halo***
 
-        <!-- Preview -->
-        <div class="bg-white p-8 rounded shadow-md w-full max-w-md h-[500px] overflow-y-auto">
-            <h2 class="text-xl font-bold mb-4 text-center">Live Preview</h2>
-            <div class="prose max-w-none" x-html="marked.parse(markdownContent)"></div>
-        </div>
-        
+## Code
 
-        <!-- button bottom -->
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2">
-          
-            <button @click="convertToPdf" class="bg-green-600 text-white px-6 py-3 rounded shadow hover:bg-green-700 transition">
-                Convert to PDF
-            </button>
-        </div>
-    </section>
-    
+\`\`\`javascript
+function hey(name) {
+  console.log(\`Halo, \${name}!\`);
+}
 
-    
+hey('World');
+\`\`\`
 
+## Tabel
 
-    <!-- add live preview markdown -->
-    
+| Fitur | Status |
+|---------|--------|
+| Live Preview | Bener |
 
+## Blockquote
 
-    <script>
+> "Markfown Blockquete."`;
 
-    function markdownToPdfApp() {
-        return {
-            markdownContent: '# Hello World\n\nThis is a **markdown** to PDF converter.\n\n- Item 1\n- Item 2\n- Item 3',
-            convertToPdf() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
+    input.value = defaultMarkdown;
 
-                // Convert markdown to HTML
-                const htmlContent = marked.parse(this.markdownContent);
-
-                // Create a temporary element to hold the HTML content
-                const tempElement = document.createElement('div');
-                tempElement.innerHTML = htmlContent;
-
-                // Use jsPDF's html method to convert HTML to PDF
-                doc.html(tempElement, {
-                    callback: function (doc) {
-                        doc.save('markdown.pdf');
-                    },
-                    x: 10,
-                    y: 10
-                });
-            }
-        }
+    function updatePreview() {
+        const markdown = input.value;
+      
+        marked.setOptions({
+          breaks: true,
+          gfm: true
+         });
+      
+      const html = marked.parse(markdown);
+        preview.innerHTML = html;
+      
+      const words = markdown.trim() ? markdown.trim().split(/\s+/).length : 0;
+      const chars = markdown.length;
+        stats.textContent = `${words} words • ${chars} characters`;
     }
-    </script>
+
+      function clearEditor() {
+        input.value = '';
+          updatePreview();
+      }
+
+      
+
+  function downloadPdf() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const htmlContent = marked.parse(input.value);
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = htmlContent;
+    tempElement.style.padding = '20px';
+    tempElement.style.fontFamily = 'Arial, sans-serif';
+      
 
 
+      doc.html(tempElement, {
+        callback: function (doc) {
+          doc.save('document.pdf');
+        },
+        x: 10,
+        y: 10,
+        width: 180,
+        windowWidth: 800
+    });
+    }
 
+
+ input.addEventListener('input', updatePreview);
     
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+      const start = this.selectionStart;
+        const end = this.selectionEnd;
+        this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+     this.selectionStart = this.selectionEnd = start + 2;
+      }
+    });
+
+
+
+
+
+    updatePreview();
+  </script>
 </body>
 </html>
